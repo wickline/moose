@@ -267,8 +267,8 @@ use Test::Requires {
 }
 
 {
-    ok( ! WantsSugar->can('has'),  'WantsSugar::has() has been cleaned' );
-    ok( ! WantsSugar->can('with'), 'WantsSugar::with() has been cleaned' );
+    ok( ! WantsOverridingSugar->can('has'),  'WantsSugar::has() has been cleaned' );
+    ok( ! WantsOverridingSugar->can('with'), 'WantsSugar::with() has been cleaned' );
 }
 
 {
@@ -314,8 +314,6 @@ use Test::Requires {
     ok( ! WantsOverridingSugar::PassThru->can('has'),  'WantsOverridingSugar::PassThru::has() has been cleaned' );
     ok( ! WantsOverridingSugar::PassThru->can('with'), 'WantsOverridingSugar::PassThru::with() has been cleaned' );
 }
-
-
 
 {
     package NonExistentExport;
