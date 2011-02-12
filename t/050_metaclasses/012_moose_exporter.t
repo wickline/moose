@@ -272,6 +272,52 @@ use Test::Requires {
 }
 
 {
+    package MooseX::OverridingSugar::PassThru;
+    
+    sub with {
+        my $caller = shift->name;
+        return $caller . ' called with';
+    }
+    
+    Moose::Exporter->setup_import_methods(
+        with_meta => ['with'],
+        also      => 'MooseX::OverridingSugar',
+    );
+    
+}
+
+{
+
+    package WantsOverridingSugar::PassThru;
+
+    MooseX::OverridingSugar::PassThru->import();
+
+    ::can_ok( 'WantsOverridingSugar::PassThru', 'has' );
+    ::can_ok( 'WantsOverridingSugar::PassThru', 'with' );
+    ::is(
+        has('foo'),
+        'WantsOverridingSugar::PassThru called has',
+        'has from MooseX::OverridingSugar is called, not has from Moose'
+    );
+
+    ::is(
+        with('foo'),
+        'WantsOverridingSugar::PassThru called with',
+        'with from MooseX::OverridingSugar::PassThru is called, not has from Moose'
+    );
+
+
+    MooseX::OverridingSugar->unimport();
+}
+
+{
+    ok( ! WantsOverridingSugar::PassThru->can('has'),  'WantsOverridingSugar::PassThru::has() has been cleaned' );
+    ok( ! WantsOverridingSugar::PassThru->can('with'), 'WantsOverridingSugar::PassThru::with() has been cleaned' );
+}
+
+
+
+{
     package NonExistentExport;
 
     use Moose ();
