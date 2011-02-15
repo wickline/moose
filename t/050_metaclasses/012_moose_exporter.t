@@ -307,7 +307,7 @@ use Test::Requires {
     );
 
 
-    MooseX::OverridingSugar->unimport();
+    MooseX::OverridingSugar::PassThru->unimport();
 }
 
 {
@@ -316,6 +316,7 @@ use Test::Requires {
 }
 
 {
+
     package NonExistentExport;
 
     use Moose ();
