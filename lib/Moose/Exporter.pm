@@ -33,8 +33,9 @@ sub build_import_methods {
 
     $EXPORT_SPEC{$exporting_package} = \%args;
 
-    my @exports_from = $class->_follow_also($exporting_package);
-
+    my @exports_from = reverse $class->_follow_also($exporting_package);
+    warn join(' ' => @exports_from) if @exports_from;
+    warn $exporting_package;
     my $export_recorder = {};
     my $is_reexport     = {};
 
@@ -137,8 +138,8 @@ sub _make_exporter {
         my $exporting_package = shift;
 
         local %$seen = ( $exporting_package => 1 );
-
-        return reverse uniq( _follow_also_real($exporting_package) );
+        
+        return  uniq( _follow_also_real($exporting_package) );
     }
 
     sub _follow_also_real {
@@ -420,7 +421,9 @@ sub _make_import_sub {
         warnings->import;
 
         my $did_init_meta;
-        for my $c ( grep { $_->can('init_meta') } $class, @{$exports_from} ) {
+        
+        warn 'INIT META: ' . join ' ',  @{$exports_from}, $class;
+        for my $c ( grep { $_->can('init_meta') } @{$exports_from}, $class ) {
 
             # init_meta can apply a role, which when loaded uses
             # Moose::Exporter, which in turn sets $CALLER, so we need

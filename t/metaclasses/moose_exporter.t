@@ -308,7 +308,7 @@ use Test::Requires {
 
     MooseX::OverridingSugar::PassThru->unimport();
 }
-
+done_testing && exit;
 {
     ok( ! WantsOverridingSugar::PassThru->can('has'),  'WantsOverridingSugar::PassThru::has() has been cleaned' );
     ok( ! WantsOverridingSugar::PassThru->can('with'), 'WantsOverridingSugar::PassThru::with() has been cleaned' );
