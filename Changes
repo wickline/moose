@@ -3,6 +3,11 @@ for, noteworthy changes.
 
 {{$NEXT}}
 
+  [BUG FIXES]
+
+  * Stop using parent.pm in the test suite as we don't declare a dependency
+    on it (t0m).
+
 2.0401 Thu, Nov 17, 2011
 
   [BUG FIXES]
