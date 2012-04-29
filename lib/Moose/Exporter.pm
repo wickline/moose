@@ -142,7 +142,11 @@ sub _make_exporter {
 
         local %$seen = ( $exporting_package => 1 );
 
-        return uniq( _follow_also_real($exporting_package) );
+        my @also = uniq( _follow_also_real($exporting_package) );
+
+        _die_if_cycle_found_in_also_list_for_package( $exporting_package );
+
+        return @also;
     }
 
     sub _follow_also_real {
@@ -156,21 +160,43 @@ sub _make_exporter {
                 . ( $loaded ? "" : " (is it loaded?)" );
         }
 
-        my $also = $EXPORT_SPEC{$exporting_package}{also};
+        my @also = _also_list_for_package( $exporting_package );
 
+        return @also, map { _follow_also_real($_) } grep { !$seen->{$_}++ } @also;
+    }
+
+    sub _also_list_for_package {
+        my $pkg = shift;
+        my $also = $EXPORT_SPEC{$pkg}{also};
         return unless defined $also;
+        return ref $also ? @$also : $also;
+    }
 
-        my @also = ref $also ? @{$also} : $also;
-
-        for my $package (@also) {
-            die
-                "Circular reference in 'also' parameter to Moose::Exporter between $exporting_package and $package"
-                if $seen->{$package};
-
-            $seen->{$package} = 1;
+    # this is no Tarjan algorithm, but for the list sizes expected,
+    # brute force will probably be fine (and more maintainable)
+    sub _die_if_cycle_found_in_also_list_for_package {
+        my $pkg = shift;
+        _die_if_also_list_contains_verboten_entries(
+            [ _also_list_for_package( $pkg ) ],
+            [ $pkg ],
+        );
+    }
+    sub _die_if_also_list_contains_verboten_entries {
+        my ( $also_list, $verboten_list ) = @_;
+        $|=1;
+        return unless @$also_list && @$verboten_list;
+        for my $also_member ( @$also_list ) {
+            for my $verboten_member ( @$verboten_list ) {
+                next unless $also_member eq $verboten_member;
+                die "Circular reference in 'also' parameter to Moose::Exporter between " .  join( ', ',
+                    @$verboten_list
+                ) . " and $also_member";
+            }
+            _die_if_also_list_contains_verboten_entries(
+                [ _also_list_for_package( $also_member ) ],
+                [ $also_member, @$verboten_list ],
+            );
         }
-
-        return @also, map { _follow_also_real($_) } @also;
     }
 }
 
